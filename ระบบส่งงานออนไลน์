@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบส่งงาน xxx | xxxxxx </title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts: Prompt -->
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-red: #075dcf;
+            --secondary-yellow: #FFC107;
+            --bg-color: #F8F9FA;
+            --card-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        
+        body {
+            font-family: 'Prompt', sans-serif;
+            background-color: var(--bg-color);
+            color: #333;
+        }
+
+        /* Navbar Styling */
+        .navbar-custom {
+            background: linear-gradient(135deg, var(--primary-red), #075dcf);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .navbar-brand {
+            color: white !important;
+            font-weight: 600;
+        }
+        .nav-link {
+            color: rgba(255,255,255,0.8) !important;
+            font-weight: 400;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: var(--secondary-yellow) !important;
+        }
+
+        /* Card Customization */
+        .card-custom {
+            border: none;
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+            transition: transform 0.3s;
+        }
+        .card-header-custom {
+            background-color: white;
+            border-bottom: 2px solid var(--secondary-yellow);
+            padding: 20px;
+        }
+        .card-header-custom h4 {
+            color: var(--primary-red);
+            font-weight: 600;
+            margin: 0;
+        }
+
+        /* Buttons */
+        .btn-primary-custom {
+            background-color: var(--primary-red);
+            border-color: var(--primary-red);
+            border-radius: 8px;
+            padding: 10px 24px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        .btn-primary-custom:hover {
+            background-color: #075dcf;
+            border-color: #075dcf;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(211, 47, 47, 0.3);
+        }
+        .btn-outline-custom {
+            border: 2px solid var(--secondary-yellow);
+            color: #333;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        .btn-outline-custom:hover {
+            background-color: var(--secondary-yellow);
+            color: #000;
+        }
+
+        /* Status Colors */
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+        .status-green { background-color: #E8F5E9; color: #2E7D32; }
+        .status-yellow { background-color: #FFF8E1; color: #F57F17; }
+        .status-red { background-color: #FFEBEE; color: #C62828; }
+
+        /* Form Controls */
+        .form-control, .form-select {
+            border-radius: 8px;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--secondary-yellow);
+            box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.25);
+        }
+
+        /* Loading Overlay */
+        #loadingOverlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.9);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .spinner-custom {
+            color: var(--primary-red);
+            width: 4rem; height: 4rem;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fa-solid fa-laptop-code me-2 text-warning"></i> 
+               รหัสวิชา xxx รายวิชา xxxx
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" style="border-color: rgba(255,255,255,0.5);">
+                <i class="fa-solid fa-bars text-white"></i>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" onclick="switchTab('submitView', this)"><i class="fa-solid fa-paper-plane me-1"></i> ส่งงาน</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" onclick="switchTab('statusView', this)"><i class="fa-solid fa-search me-1"></i> เช็คสถานะ</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" onclick="switchTab('dashboardView', this)"><i class="fa-solid fa-chart-pie me-1"></i> แดชบอร์ด (ครู)</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-5" id="submitView">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card card-custom">
+                    <div class="card-header-custom d-flex justify-content-between align-items-center">
+                        <h4><i class="fa-solid fa-file-arrow-up me-2"></i> ฟอร์มส่งงานนักเรียน</h4>
+                        <span class="badge bg-warning text-dark px-3 py-2 rounded-pill">ครูxxxxx</span>
+                    </div>
+                    <div class="card-body p-4">
+                        <form id="submissionForm" onsubmit="handleFormSubmit(event)">
+                            <div class="row g-3">
+                                <!-- ข้อมูลส่วนตัว -->
+                                <div class="col-md-4">
+                                    <label class="form-label text-muted">รหัสนักเรียน <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="studentId" required pattern="[0-9]+" placeholder="">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label text-muted">ห้องเรียน <span class="text-danger">*</span></label>
+                                    <select class="form-select" id="room" required>
+                                        <option value="" disabled selected>เลือกห้องเรียน...</option>
+                                        <option value="ม.5/4">ม.5/4</option>
+                                        <option value="ม.5/9">ม.5/9</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label text-muted">เลขที่ <span class="text-danger">*</span></label>
+                                    <input type="number" class="form-control" id="number" required min="1">
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label class="form-label text-muted">คำนำหน้า <span class="text-danger">*</span></label>
+                                    <select class="form-select" id="prefix" required>
+                                        <option value="นาย">นาย</option>
+                                        <option value="นางสาว">นางสาว</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label text-muted">ชื่อ <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="fname" required>
+                                </div>
+                                <div class="col-md-5">
+                                    <label class="form-label text-muted">นามสกุล <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="lname" required>
+                                </div>
+
+                                <hr class="my-4 text-muted">
+
+                                <!-- ข้อมูลงาน -->
+                                <div class="col-12">
+                                    <label class="form-label fw-bold">เลือกรายการชิ้นงาน <span class="text-danger">*</span></label>
+                                    <select class="form-select border-warning" id="assignment" required>
+                                        <option value="" disabled selected>-- กรุณาเลือกชิ้นงานที่ต้องการส่ง --</option>
+                                        <option value="ชิ้นงานที่ 1: ออกแบบโลโก้ (Logo Design)">ชิ้นงานที่ 1: ออกแบบโต๊ะ</option>
+                               
+                                    </select>
+                                </div>
+
+                                <div class="col-12">
+                                    <label class="form-label fw-bold">แนบไฟล์งาน <span class="text-danger">*</span></label>
+                                    <input class="form-control" type="file" id="fileUpload" accept=".pdf,.jpg,.jpeg,.png" required>
+                                    <div class="form-text text-danger"><i class="fa-solid fa-circle-info"></i> รองรับไฟล์ PDF, JPG, PNG ขนาดไม่เกิน 10 MB</div>
+                                </div>
+
+                                <div class="col-12">
+                                    <label class="form-label fw-bold">รายละเอียดเพิ่มเติม (ถ้ามี)</label>
+                                    <textarea class="form-control" id="details" rows="2" placeholder="อธิบายงานเพิ่มเติม หรือแนบ Link สำรอง..."></textarea>
+                                </div>
+
+                                <div class="col-12 mt-4 text-center">
+                                    <button type="submit" class="btn btn-primary-custom w-100 text-white py-2 fs-5">
+                                        <i class="fa-solid fa-cloud-arrow-up me-2"></i> ส่งงาน
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container my-5 d-none" id="statusView">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card card-custom mb-4">
+                    <div class="card-body p-4 text-center">
+                        <h4 class="mb-4 text-danger fw-bold"><i class="fa-solid fa-magnifying-glass me-2"></i> ตรวจสอบสถานะการส่งงาน</h4>
+                        <div class="input-group mb-3 mx-auto" style="max-width: 500px;">
+                            <input type="text" class="form-control form-control-lg border-danger" id="searchInput" placeholder="กรอก รหัสนักเรียน หรือ ชื่อ-สกุล">
+                            <button class="btn btn-primary-custom text-white" type="button" onclick="searchStatus()">ค้นหาเลย</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="searchResults" class="d-none">
+                    <!-- ผลลัพธ์จะถูกแทรกที่นี่ -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container my-5 d-none" id="dashboardView">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="fw-bold text-danger"><i class="fa-solid fa-chart-line me-2"></i> สรุปข้อมูลการส่งงาน (Dashboard)</h3>
+            <button class="btn btn-outline-custom" onclick="loadDashboard()"><i class="fa-solid fa-rotate-right"></i> รีเฟรชข้อมูล</button>
+        </div>
+        
+        <div class="row g-4 mb-4">
+            <div class="col-md-4">
+                <div class="card card-custom h-100 bg-white border-start border-danger border-4">
+                    <div class="card-body text-center p-4">
+                        <div class="text-muted mb-2">จำนวนงานที่ส่งทั้งหมด</div>
+                        <h1 class="display-4 fw-bold text-danger" id="dashTotal">-</h1>
+                        <div class="text-muted small">รายการ</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="card card-custom h-100 p-3">
+                    <canvas id="roomChart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="alert alert-warning text-center" role="alert">
+            <i class="fa-solid fa-lock me-2"></i> <b>ส่วนสำหรับผู้ดูแลระบบ:</b> ข้อมูลโดยละเอียดและการจัดการสถานะ สามารถทำได้ผ่านหน้า Google Sheets
+        </div>
+    </div>
+
+    <div id="loadingOverlay" class="d-none">
+        <div class="spinner-border spinner-custom mb-3" role="status"></div>
+        <h4 class="text-danger fw-bold" id="loadingText">กำลังอัปโหลดไฟล์และส่งข้อมูล...</h4>
+        <p class="text-muted">กรุณารอสักครู่ ห้ามปิดหน้าต่างนี้</p>
+    </div>
+      <!-- Footer -->
+    <footer class="text-center py-4 mt-5 text-muted" style="border-top: 1px solid #ddd;">
+        <div class="container">
+            <small>Copyright &copy; 2026 ระบบส่งงานออนไลน์ <i class="fa-solid fa-code text-danger mx-1"></i> Dev by Krudevtech.</small>
+        </div>
+    </footer>
+
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        // --- 1. SPA Navigation Logic ---
+        function switchTab(viewId, navElement) {
+            // ซ่อนทุกหน้า
+            document.getElementById('submitView').classList.add('d-none');
+            document.getElementById('statusView').classList.add('d-none');
+            document.getElementById('dashboardView').classList.add('d-none');
+            
+            // แสดงหน้าที่เลือก
+            document.getElementById(viewId).classList.remove('d-none');
+            
+            // เปลี่ยนสถานะ Active ของ Navbar
+            document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+            navElement.classList.add('active');
+
+            // ถ้าเปิดหน้า Dashboard ให้โหลดกราฟ
+            if(viewId === 'dashboardView') {
+                loadDashboard();
+            }
+        }
+
+        // === ตั้งค่า URL ของ Web App ที่ได้จาก Google Apps Script ===
+        // นำ URL ที่ได้จากการ Deploy ของคุณมาวางในเครื่องหมายคำพูดด้านล่างนี้ (ทำแค่จุดนี้จุดเดียวครับ)
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbz0iogv1FiOz3Xlu6VMPLIE_xa3IVTG9cO_JumcBschGS6SWsKDe1HsrrFUV_A-__ZPzw/exec'; 
+
+        // ฟังก์ชันช่วยเหลือสำหรับเรียก API ไปยัง Google Apps Script 
+        async function callGoogleScriptAPI(action, payload = {}) {
+            // เปลี่ยนวิธีการตรวจสอบ URL เพื่อป้องกันการแจ้งเตือนผิดพลาด
+            if (!WEB_APP_URL || !WEB_APP_URL.startsWith('https://script.google.com/')) {
+                Swal.fire('ข้อผิดพลาด', 'กรุณาตรวจสอบการตั้งค่า WEB_APP_URL (ต้องขึ้นต้นด้วย https://script.google.com/)', 'error');
+                throw new Error('URL ของ Web App ไม่ถูกต้อง หรือยังไม่ได้ตั้งค่า');
+            }
+            
+            const requestData = { action: action, ...payload };
+            
+            try {
+                // ใช้ Fetch API ยิงข้อมูลแบบ POST
+                const response = await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(requestData),
+                    // ใช้ text/plain เพื่อหลีกเลี่ยงปัญหา CORS Preflight
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                });
+                return await response.json();
+            } catch (error) {
+                console.error("API Error:", error);
+                throw error;
+            }
+        }
+
+        // --- 3. Form Submission Logic ---
+        function handleFormSubmit(event) {
+            event.preventDefault(); // ป้องกันการรีเฟรชหน้า
+
+            const fileInput = document.getElementById('fileUpload');
+            const file = fileInput.files[0];
+
+            // ตรวจสอบขนาดไฟล์ (Max 10MB)
+            if (file && file.size > 10 * 1024 * 1024) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'ไฟล์ใหญ่เกินไป!',
+                    text: 'กรุณาอัปโหลดไฟล์ขนาดไม่เกิน 10 MB',
+                    confirmButtonColor: '#D32F2F'
+                });
+                return;
+            }
+
+            // แสดงหน้าโหลดดิ้ง
+            document.getElementById('loadingOverlay').classList.remove('d-none');
+
+            // ดึงข้อมูลจากฟอร์ม
+            const formData = {
+                studentId: document.getElementById('studentId').value,
+                room: document.getElementById('room').value,
+                number: document.getElementById('number').value,
+                prefix: document.getElementById('prefix').value,
+                fname: document.getElementById('fname').value,
+                lname: document.getElementById('lname').value,
+                assignment: document.getElementById('assignment').value,
+                details: document.getElementById('details').value
+            };
+
+            // อ่านไฟล์เป็น Base64
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                const fileData = {
+                    name: file.name,
+                    mimeType: file.type,
+                    data: e.target.result // Base64 String
+                };
+
+                // ส่งข้อมูลไปยัง GAS Backend ผ่าน Fetch API
+                try {
+                    const response = await callGoogleScriptAPI('submitWork', { formData: formData, fileData: fileData });
+                    onSuccess(response);
+                } catch (error) {
+                    onFailure(error.message || error);
+                }
+            };
+            
+            if(file) {
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function onSuccess(response) {
+            document.getElementById('loadingOverlay').classList.add('d-none');
+            
+            if (response.success) {
+                document.getElementById('submissionForm').reset();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'ส่งงานสำเร็จ!',
+                    html: `ระบบบันทึกข้อมูลเรียบร้อยแล้ว<br><b>รหัสอ้างอิง:</b> ${response.submissionId}`,
+                    confirmButtonColor: '#D32F2F'
+                });
+            } else {
+                onFailure(response.error);
+            }
+        }
+
+        function onFailure(error) {
+            document.getElementById('loadingOverlay').classList.add('d-none');
+            Swal.fire({
+                icon: 'error',
+                title: 'เกิดข้อผิดพลาด',
+                text: 'ไม่สามารถส่งงานได้: ' + error,
+                confirmButtonColor: '#D32F2F'
+            });
+        }
+
+        // --- 4. Search Status Logic ---
+        async function searchStatus() {
+            const query = document.getElementById('searchInput').value.trim();
+            if (!query) {
+                Swal.fire('แจ้งเตือน', 'กรุณากรอกข้อมูลที่ต้องการค้นหา', 'warning');
+                return;
+            }
+
+            const resultsContainer = document.getElementById('searchResults');
+            resultsContainer.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-danger"></div><p class="mt-2">กำลังค้นหา...</p></div>';
+            resultsContainer.classList.remove('d-none');
+
+            try {
+                const res = await callGoogleScriptAPI('searchStudentStatus', { query: query });
+                
+                if (res.success && res.data.length > 0) {
+                    let html = '';
+                    res.data.forEach(item => {
+                        let statusClass = item.status === 'ตรวจแล้ว' ? 'status-green' : (item.status === 'รอตรวจ' ? 'status-yellow' : 'status-red');
+                        let scoreText = item.score ? `<br><small class="text-muted">คะแนน: <b>${item.score}</b></small>` : '';
+                        
+                        html += `
+                        <div class="card card-custom mb-3">
+                            <div class="card-body d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1 fw-bold">${item.assignment}</h6>
+                                    <small class="text-muted"><i class="fa-regular fa-clock"></i> ส่งเมื่อ: ${item.date}</small>
+                                    ${scoreText}
+                                </div>
+                                <div>
+                                    <span class="status-badge ${statusClass}">${item.status}</span>
+                                </div>
+                            </div>
+                        </div>
+                        `;
+                    });
+                    resultsContainer.innerHTML = html;
+                } else {
+                    resultsContainer.innerHTML = `
+                        <div class="alert alert-danger text-center">
+                            <i class="fa-solid fa-circle-xmark me-2"></i> ไม่พบประวัติการส่งงานของข้อมูลนี้
+                        </div>`;
+                }
+            } catch (error) {
+                resultsContainer.innerHTML = `<div class="alert alert-danger text-center">เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์</div>`;
+            }
+        }
+
+        // --- 5. Dashboard Logic ---
+        let roomChartInstance = null;
+
+        async function loadDashboard() {
+            document.getElementById('dashTotal').innerText = '...';
+            
+            try {
+                const res = await callGoogleScriptAPI('getDashboardData');
+                
+                if(res.success) {
+                    document.getElementById('dashTotal').innerText = res.total;
+                    
+                    const labels = Object.keys(res.roomCounts);
+                    const data = Object.values(res.roomCounts);
+
+                    const ctx = document.getElementById('roomChart').getContext('2d');
+                    
+                    if(roomChartInstance) {
+                        roomChartInstance.destroy();
+                    }
+
+                    roomChartInstance = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'จำนวนงานที่ส่ง (ชิ้น)',
+                                data: data,
+                                backgroundColor: ['rgba(211, 47, 47, 0.7)', 'rgba(255, 193, 7, 0.7)'],
+                                borderColor: ['#D32F2F', '#FFC107'],
+                                borderWidth: 1,
+                                borderRadius: 5
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: { display: false },
+                                title: { display: true, text: 'สถิติการส่งงานแยกตามห้องเรียน', font: { family: 'Prompt', size: 16 } }
+                            },
+                            scales: {
+                                y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                            }
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error("Failed to load dashboard:", error);
+                document.getElementById('dashTotal').innerText = 'Error';
+            }
+        }
+    </script>
+</body>
+</html>
